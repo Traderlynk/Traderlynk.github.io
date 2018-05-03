@@ -72,7 +72,8 @@
                     'call': true,
                     'clear': true
                 },
-                hide_open_bookmarks: true
+                hide_open_bookmarks: true,
+                ofmeet_invitation: 'Please join meeting at:'
             });
 
             /* The user can then pass in values for the configuration
@@ -152,10 +153,11 @@
                     ev.stopPropagation();
 
                     var room = (this.model.attributes.name || Strophe.getNodeFromJid(this.model.attributes.jid)) + Math.random().toString(36).substr(2,9);
-                    var url = "https://" + 'traderlynk.4ng.net' + "/ofmeet/" + room;
+                    var url = "https://" + _converse.api.settings.get("bosh_service_url").split("/")[2] + "/ofmeet/" + room;
                     console.log('callButtonClicked', {connection: _converse.connection,  room});
 
-                    this.onMessageSubmitted(url);
+                    this.onMessageSubmitted(_converse.api.settings.get("ofmeet_invitation") + ' ' + url);
+
                     window.open(url, '_blank');
                 },
 
@@ -197,7 +199,9 @@
                 },
 
                 renderToolbar: function renderToolbar(toolbar, options) {
-                    console.log('ofmeet - renderToolbar', this.el);
+                    //console.log('ofmeet - renderToolbar', this.model);
+
+                    this.model.set({'hidden_occupants': true});
 
                     var result = this.__super__.renderToolbar.apply(this, arguments);
 
