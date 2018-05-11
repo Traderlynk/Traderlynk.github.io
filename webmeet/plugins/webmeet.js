@@ -215,6 +215,15 @@
 
                     ev.stopPropagation();
 
+                    var room = Strophe.getNodeFromJid(this.model.attributes.jid) + Math.random().toString(36).substr(2,9);
+                    var url = "https://" + _converse.api.settings.get("bosh_service_url").split("/")[2] + "/ofmeet/" + room;
+                    console.log('callButtonClicked', {connection: _converse.connection,  room});
+
+                    this.onMessageSubmitted(_converse.api.settings.get("ofmeet_invitation") + ' ' + url);
+                    window.open(url, location.href)
+
+/*
+
                     var url = "../verto";
                     var path = "https://" + _converse.api.settings.get("bosh_service_url").split("/")[2] + "/ofmeet/";
                     var converseDiv = document.getElementById("conversejs");
@@ -226,8 +235,6 @@
                         url = path + room;
                         this.onMessageSubmitted(_converse.api.settings.get("webmeet_invitation") + ' ' + url);
                     }
-
-                    //window.open(url, location.href);
 
                     iframeURLChange(jitsiDiv, function (newURL)
                     {
@@ -242,7 +249,7 @@
                     converseDiv.style.display = "none";
                     jitsiDiv.src = url;
                     jitsiDiv.style.display = "inline";
-
+*/
                 },
 
                 renderToolbar: function renderToolbar(toolbar, options) {
