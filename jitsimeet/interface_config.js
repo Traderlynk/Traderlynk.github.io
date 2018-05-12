@@ -158,7 +158,7 @@ var interfaceConfig = {
      * "canvas" will display the blur over a canvas element, while the value
      * "off" will prevent the background from rendering.
      */
-    _BACKGROUND_BLUR: 'canvas'
+    _BACKGROUND_BLUR: 'off'
 
     /**
      * Specify custom URL for downloading android mobile app.
