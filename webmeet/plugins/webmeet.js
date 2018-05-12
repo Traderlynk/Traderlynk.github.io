@@ -23,6 +23,7 @@
 
      var _converse = null;
      var messageCount = 0;
+     var currentRoom = null;
 
     // The following line registers your plugin.
     converse.plugins.add("webmeet", {
@@ -211,64 +212,55 @@
             ChatBoxView: {
 
                 toggleCall: function toggleCall(ev) {
-                   //console.log("toggleCall", this.model);
+                    console.log("toggleCall", this.model);
 
                     ev.stopPropagation();
 
-                    var url = "../verto/index.html";
+                    var url = "../phone/index.html";
                     var converseDiv = document.getElementById("conversejs");
                     var jitsiDiv = document.getElementById("jitsimeet");
 
-                    if (_converse.api.settings.get("ofswitch") == false)
+                    iframeURLChange(jitsiDiv, function (newURL)
                     {
-                        var url = "../jitsimeet/index.html?room=";
-                        var room = Strophe.getNodeFromJid(this.model.attributes.jid) + Math.random().toString(36).substr(2,9);
-                        url = url + room;
-
-                        var a = document.createElement('a');
-                        a.href = url;
-                        url = a.href;
-
-                        this.onMessageSubmitted(_converse.api.settings.get("webmeet_invitation") + ' ' + url);
-
-                        iframeURLChange(jitsiDiv, function (newURL)
+                        if (newURL.indexOf("jitsimeet") == -1 && newURL.indexOf("phone") == -1)
                         {
-                            if (newURL.indexOf("jitsimeet") == -1)
-                            {
-                                converseDiv.style.display = "inline";
-                                jitsiDiv.style.display = "none";
-                                jitsiDiv.src = "about:blank";
-                            }
-                        });
+                            converseDiv.style.display = "inline";
+                            jitsiDiv.style.display = "none";
+                            jitsiDiv.src = "about:blank";
+                        }
+                    });
 
-                        converseDiv.style.display = "none";
-                        jitsiDiv.src = url;
-                        jitsiDiv.style.display = "inline";
+                    converseDiv.style.display = "none";
+                    jitsiDiv.src = url;
+                    jitsiDiv.style.display = "inline";
 
-                    } else {
-                        window.open(url, location.href);
-                    }
                 },
 
                 renderToolbar: function renderToolbar(toolbar, options) {
-                    //console.log('webmeet - renderToolbar', this.model);
+                    console.log('webmeet - renderToolbar', this.model);
 
                     this.model.set({'hidden_occupants': true});
+                    currentRoom = this;
 
                     var result = this.__super__.renderToolbar.apply(this, arguments);
 
                     if (_converse.view_mode === 'embedded')
                     {
-                        // exit button for webmeet
-
                         var id = this.model.get("box_id");
-                        var html = '<li id="webmeet-exit-webchat-' + id + '"><a class="fa fa-sign-out" title="Exit Web Chat"></a></li>';
+
+                        var html = '<li id="webmeet-jitsi-meet-' + id + '"><a class="fa fa-video-camera" title="Audio/Video Conferennce"></a></li>';
+                        $(this.el).find('.toggle-call').after(html);
+
+                        html = '<li id="webmeet-exit-webchat-' + id + '"><a class="fa fa-sign-out" title="Exit Web Chat"></a></li>';
                         $(this.el).find('.toggle-call').after(html);
 
                         setTimeout(function()
                         {
                             var exitButton = document.getElementById("webmeet-exit-webchat-" + id);
                             exitButton.addEventListener('click', doExit, false);
+
+                            var exitJitsiMeet = document.getElementById("webmeet-jitsi-meet-" + id);
+                            exitJitsiMeet.addEventListener('click', doVideo, false);
 
                         });
 
@@ -308,6 +300,47 @@
             }
         }
     });
+
+    var doVideo = function doExit(event)
+    {
+        console.log("doVideo", event);
+
+        var url = "../verto/index.html";
+        var converseDiv = document.getElementById("conversejs");
+        var jitsiDiv = document.getElementById("jitsimeet");
+
+        if (_converse.api.settings.get("ofswitch") == false)
+        {
+            var url = "../jitsimeet/index.html?room=";
+            var room = Strophe.getNodeFromJid(currentRoom.model.attributes.jid).toLowerCase() + "-" + Math.random().toString(36).substr(2,9);
+            url = url + room;
+
+            var a = document.createElement('a');
+            a.href = url;
+            url = a.href;
+
+            currentRoom.onMessageSubmitted(_converse.api.settings.get("webmeet_invitation") + ' ' + url);
+
+            //window.open(url, location.href);
+
+            iframeURLChange(jitsiDiv, function (newURL)
+            {
+                if (newURL.indexOf("jitsimeet") == -1)
+                {
+                    converseDiv.style.display = "inline";
+                    jitsiDiv.style.display = "none";
+                    jitsiDiv.src = "about:blank";
+                }
+            });
+
+            converseDiv.style.display = "none";
+            jitsiDiv.src = url;
+            jitsiDiv.style.display = "inline";
+
+        } else {
+            window.open(url, location.href);
+        }
+    }
 
     var doExit = function doExit(event)
     {
