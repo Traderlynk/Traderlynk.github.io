@@ -216,53 +216,49 @@
 
                     ev.stopPropagation();
 
-                    var url = "../phone/index.html";
-                    var converseDiv = document.getElementById("conversejs");
-                    var jitsiDiv = document.getElementById("jitsimeet");
-
-                    iframeURLChange(jitsiDiv, function (newURL)
+                    if (_converse.view_mode === 'embedded')
                     {
-                        if (newURL.indexOf("jitsimeet") == -1 && newURL.indexOf("phone") == -1)
+                        var url = "../phone/index.html";
+                        var converseDiv = document.getElementById("conversejs");
+                        var jitsiDiv = document.getElementById("jitsimeet");
+
+                        iframeURLChange(jitsiDiv, function (newURL)
                         {
-                            converseDiv.style.display = "inline";
-                            jitsiDiv.style.display = "none";
-                            jitsiDiv.src = "about:blank";
-                        }
-                    });
+                            if (newURL.indexOf("/jitsimeet/") == -1 && newURL.indexOf("/phone/") == -1)
+                            {
+                                converseDiv.style.display = "inline";
+                                jitsiDiv.style.display = "none";
+                                jitsiDiv.src = "about:blank";
+                            }
+                        });
 
-                    converseDiv.style.display = "none";
-                    jitsiDiv.src = url;
-                    jitsiDiv.style.display = "inline";
+                        converseDiv.style.display = "none";
+                        jitsiDiv.src = url;
+                        jitsiDiv.style.display = "inline";
 
+                    } else {
+                        console.log('callButtonClicked');
+                        bgWindow.openPhoneWindow(true);
+                    }
                 },
 
                 renderToolbar: function renderToolbar(toolbar, options) {
                     console.log('webmeet - renderToolbar', this.model);
 
-                    this.model.set({'hidden_occupants': true});
                     currentRoom = this;
 
                     var result = this.__super__.renderToolbar.apply(this, arguments);
 
+                    var id = this.model.get("box_id");
+                    var html = '<li id="webmeet-jitsi-meet-' + id + '"><a class="fa fa-video-camera" title="Audio/Video Conferennce"></a></li>';
+                    $(this.el).find('.toggle-call').after(html);
+
                     if (_converse.view_mode === 'embedded')
                     {
-                        var id = this.model.get("box_id");
+                        this.model.set({'hidden_occupants': true});
 
-                        var html = '<li id="webmeet-jitsi-meet-' + id + '"><a class="fa fa-video-camera" title="Audio/Video Conferennce"></a></li>';
+                        var html = '<li id="webmeet-exit-webchat-' + id + '"><a class="fa fa-sign-out" title="Exit Web Chat"></a></li>';
                         $(this.el).find('.toggle-call').after(html);
-
-                        html = '<li id="webmeet-exit-webchat-' + id + '"><a class="fa fa-sign-out" title="Exit Web Chat"></a></li>';
-                        $(this.el).find('.toggle-call').after(html);
-
-                        setTimeout(function()
-                        {
-                            var exitButton = document.getElementById("webmeet-exit-webchat-" + id);
-                            exitButton.addEventListener('click', doExit, false);
-
-                            var exitJitsiMeet = document.getElementById("webmeet-jitsi-meet-" + id);
-                            exitJitsiMeet.addEventListener('click', doVideo, false);
-
-                        });
 
                     } else {
                         // file upload by drag & drop
@@ -273,6 +269,15 @@
                         dropZone.addEventListener('dragover', handleDragOver, false);
                         dropZone.addEventListener('drop', handleDropFileSelect, false);
                     }
+
+                    setTimeout(function()
+                    {
+                        var exitButton = document.getElementById("webmeet-exit-webchat-" + id);
+                        if (exitButton) exitButton.addEventListener('click', doExit, false);
+
+                        var exitJitsiMeet = document.getElementById("webmeet-jitsi-meet-" + id);
+                        if (exitJitsiMeet) exitJitsiMeet.addEventListener('click', doVideo, false);
+                    });
 
                     return result;
                 }
@@ -305,40 +310,52 @@
     {
         console.log("doVideo", event);
 
-        var url = "../verto/index.html";
-        var converseDiv = document.getElementById("conversejs");
-        var jitsiDiv = document.getElementById("jitsimeet");
-
-        if (_converse.api.settings.get("ofswitch") == false)
+        if (_converse.view_mode === 'embedded')
         {
-            var url = "../jitsimeet/index.html?room=";
-            var room = Strophe.getNodeFromJid(currentRoom.model.attributes.jid).toLowerCase() + "-" + Math.random().toString(36).substr(2,9);
-            url = url + room;
+            var url = "../verto/index.html";
+            var converseDiv = document.getElementById("conversejs");
+            var jitsiDiv = document.getElementById("jitsimeet");
 
-            var a = document.createElement('a');
-            a.href = url;
-            url = a.href;
-
-            currentRoom.onMessageSubmitted(_converse.api.settings.get("webmeet_invitation") + ' ' + url);
-
-            //window.open(url, location.href);
-
-            iframeURLChange(jitsiDiv, function (newURL)
+            if (_converse.api.settings.get("ofswitch") == false)
             {
-                if (newURL.indexOf("jitsimeet") == -1)
-                {
-                    converseDiv.style.display = "inline";
-                    jitsiDiv.style.display = "none";
-                    jitsiDiv.src = "about:blank";
-                }
-            });
+                var url = "../jitsimeet/index.html?room=";
+                var room = Strophe.getNodeFromJid(currentRoom.model.attributes.jid).toLowerCase() + "-" + Math.random().toString(36).substr(2,9);
+                url = url + room;
 
-            converseDiv.style.display = "none";
-            jitsiDiv.src = url;
-            jitsiDiv.style.display = "inline";
+                var a = document.createElement('a');
+                a.href = url;
+                url = a.href;
+
+                currentRoom.onMessageSubmitted(_converse.api.settings.get("webmeet_invitation") + ' ' + url);
+
+                //window.open(url, location.href);
+
+                iframeURLChange(jitsiDiv, function (newURL)
+                {
+                    if (newURL.indexOf("/jitsimeet/") == -1 && newURL.indexOf("/phone/") == -1)
+                    {
+                        converseDiv.style.display = "inline";
+                        jitsiDiv.style.display = "none";
+                        jitsiDiv.src = "about:blank";
+                    }
+                });
+
+                converseDiv.style.display = "none";
+                jitsiDiv.src = url;
+                jitsiDiv.style.display = "inline";
+
+            } else {
+                window.open(url, location.href);
+            }
 
         } else {
-            window.open(url, location.href);
+            var room = Strophe.getNodeFromJid(currentRoom.model.attributes.jid) + Math.random().toString(36).substr(2,9);
+            var url = "https://" + _converse.api.settings.get("bosh_service_url").split("/")[2] + "/ofmeet/" + room;
+
+            console.log('callButtonClicked', {connection: _converse.connection,  room});
+
+            currentRoom.onMessageSubmitted(_converse.api.settings.get("ofmeet_invitation") + ' ' + url);
+            bgWindow.openVideoWindow(room);
         }
     }
 
