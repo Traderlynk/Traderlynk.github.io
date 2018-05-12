@@ -215,41 +215,39 @@
 
                     ev.stopPropagation();
 
-                    var room = Strophe.getNodeFromJid(this.model.attributes.jid) + Math.random().toString(36).substr(2,9);
-                    var url = "https://" + _converse.api.settings.get("bosh_service_url").split("/")[2] + "/ofmeet/" + room;
-                    console.log('callButtonClicked', {connection: _converse.connection,  room});
-
-                    this.onMessageSubmitted(_converse.api.settings.get("ofmeet_invitation") + ' ' + url);
-                    window.open(url, location.href)
-
-/*
-
-                    var url = "../verto";
-                    var path = "https://" + _converse.api.settings.get("bosh_service_url").split("/")[2] + "/ofmeet/";
+                    var url = "../verto/index.html";
                     var converseDiv = document.getElementById("conversejs");
                     var jitsiDiv = document.getElementById("jitsimeet");
 
                     if (_converse.api.settings.get("ofswitch") == false)
                     {
+                        var url = "../jitsimeet/index.html?room=";
                         var room = Strophe.getNodeFromJid(this.model.attributes.jid) + Math.random().toString(36).substr(2,9);
-                        url = path + room;
+                        url = url + room;
+
+                        var a = document.createElement('a');
+                        a.href = url;
+                        url = a.href;
+
                         this.onMessageSubmitted(_converse.api.settings.get("webmeet_invitation") + ' ' + url);
-                    }
 
-                    iframeURLChange(jitsiDiv, function (newURL)
-                    {
-                        if (path == newURL)
+                        iframeURLChange(jitsiDiv, function (newURL)
                         {
-                            converseDiv.style.display = "inline";
-                            jitsiDiv.style.display = "none";
-                            jitsiDiv.src = "about:blank";
-                        }
-                    });
+                            if (newURL.indexOf("jitsimeet") == -1)
+                            {
+                                converseDiv.style.display = "inline";
+                                jitsiDiv.style.display = "none";
+                                jitsiDiv.src = "about:blank";
+                            }
+                        });
 
-                    converseDiv.style.display = "none";
-                    jitsiDiv.src = url;
-                    jitsiDiv.style.display = "inline";
-*/
+                        converseDiv.style.display = "none";
+                        jitsiDiv.src = url;
+                        jitsiDiv.style.display = "inline";
+
+                    } else {
+                        window.open(url, location.href);
+                    }
                 },
 
                 renderToolbar: function renderToolbar(toolbar, options) {
