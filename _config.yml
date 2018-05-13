@@ -26,6 +26,9 @@ footer-links:
 # You can find your shortname on the Settings page of your Disqus account
 disqus:
 
+# Enter true or false to enable or disable WebMeet for the site
+webmeet: true
+
 # Enter your Google Analytics web tracking code (e.g. UA-2110908-2) to activate tracking
 google_analytics:
 
