@@ -1,13 +1,11 @@
 var config = {
-    room: "tester",          // BAO
-
     hosts: {
-        domain: 'desktop-545pc5b',
-        muc: 'conference.desktop-545pc5b'
+        domain: 'traderlynk.4ng.net',
+        muc: 'conference.traderlynk.4ng.net'
     },
 
-    bosh: 'wss://desktop-545pc5b:7443/ws/',
-    clientNode: 'http://jitsi.org/jitsimeet',
+    bosh: 'wss://traderlynk.4ng.net:7443/ws/',
+    clientNode: 'http://igniterealtime.org/webmeet',
 
     disableSuspendVideo: true,
     desktopSharingChromeExtId: null,
